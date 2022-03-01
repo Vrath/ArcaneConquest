@@ -1,0 +1,539 @@
+@import url('https://fonts.googleapis.com/css2?family=Geo:ital@0;1&family=Titillium+Web:wght@200&family=VT323&display=swap');
+
+* {
+    box-sizing: border-box;
+    user-select: none; /* Chrome and Opera */
+   -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+   -moz-user-select: none; /* Firefox */
+   -ms-user-select: none; /* Internet Explorer/Edge */
+    /* border: 1px dotted blue; */
+}  
+
+html,
+body {
+    height:  100%;
+    margin:  0px auto;
+    padding: 0px auto;
+    font-size: 20px;
+    font-family: 'Titillium Web', sans-serif;
+    background-color: #222;
+    color: whitesmoke;
+    cursor: default;
+}
+.box {
+    display: flex;
+    height:     auto;
+    min-height: 100%;
+    margin:     0px auto;
+    padding:    0px auto;
+}
+.flow-column{
+    flex-flow: column;
+}
+
+.box .row.header {
+    flex: 0 1 auto;
+}
+
+.box .row.content {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 100%;
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.box .row.footer {
+  flex: 0 1 40px;
+  text-align: center;
+  line-height: 40px;
+}
+
+.subpage{
+    height: auto;
+    min-height: 100%;
+    margin: 0px auto;
+    padding: 0px auto;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: 100%;
+}
+
+.pageContent{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    min-height: 100%;
+    overflow-y: auto;
+    Height: auto;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+#popmanagement p, #popmanagement .btn{
+    margin: 5px;
+}
+
+img{
+    vertical-align: -20%;
+}
+a img{
+    display: none;
+}
+/* TEXT FORMATTING */
+
+h1 {
+    font-size: 96px;
+    text-align: center;
+    font-family: 'Geo', sans-serif;
+    margin: 20px;  
+    filter: drop-shadow(0 0 2px crimson);
+    text-shadow: 5px 5px 10px black;  
+
+}
+h2{
+    font-family: 'Geo', sans-serif;
+    font-size: 48px;
+    margin: 0;
+    text-align: center;
+    text-shadow: 5px 5px 10px black;
+    width: 100%;
+}
+h2:after{
+    content:' ';
+    display:block;
+    border:1px solid gray;
+	margin:5px;
+    box-shadow: 1px 1px 3px black;
+}
+h3{
+    font-size: 32px;
+    font-family: 'Geo', sans-serif;
+    margin: 0;
+    text-shadow: 5px 5px 10px black;
+}
+p{
+    margin: 0;
+}
+.desc{
+    font-style: italic;
+    font-size: 16px;
+}
+
+.item-bg{
+    background-image: url("img/itembg.png");
+    height: 32px;
+    width: 32px;
+    display: inline-block;
+    line-height: 32px;
+}
+.item-bg img{
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, -0%);
+}
+/* STICKY NAVBAR */
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+.sticky + .content{
+    padding-top: 60px;
+}
+.topnav {
+    overflow: hidden;
+    background-color: #333;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    background: linear-gradient(124deg,rgb(255,0,0), rgb(255,127,0),rgb(255,255,0),rgb(127,255,0),rgb(0,255,0),rgb(0,255,127),rgb(0,255,255),rgb(0,127,255),rgb(0,0,255), rgb(127,0,255), rgb(255,0,255), rgb(255,0,127));
+    background-size: 1800% 1800%;
+    -webkit-animation: rainbow 180s ease infinite;
+    -z-animation: rainbow 180s ease infinite;
+    -o-animation: rainbow 180s ease infinite;
+    animation: rainbow 180s ease infinite;
+    -webkit-box-shadow: 0px 0px 32px 8px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0px 0px 32px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 0px 32px 8px rgba(0, 0, 0, 0.5);
+    text-shadow: 5px 5px 10px black;
+}
+
+.topnav img{
+    filter: drop-shadow(0 0 5px black);
+}
+
+.topnav a {
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    display: table-cell;
+    cursor: pointer;
+    font-family: 'Geo', sans-serif;
+    font-weight: bolder;
+    font-size: 28px;
+    text-shadow: 1 1 1px white;
+}
+
+.topnav a:hover, .topnav a:focus {
+    background-color:rgba(0, 0, 0, 0.65);
+    color: whitesmoke;
+    box-shadow: 0 0 32px 2px black;
+}
+
+.topnav a.active {
+    color: whitesmoke;
+}
+
+.topnav .icon {
+    display: none;
+}
+/* RESOURCE BAR */
+#resourcebar{
+    padding: 5px;
+    float: left;
+    width: 20%;
+    height:     auto;
+    min-height: 100%;
+    overflow: auto;
+}
+
+#resourceBarContents{
+    width: 100%;
+    table-layout: fixed;
+}
+.res{
+    margin: 5px;
+    padding: 10px;
+    line-height: 32px;
+    height: 36px;
+}
+.res:nth-child(even) {
+    background-color: #2b2b2b;
+}
+
+.name{
+    width: 40%;
+}
+.prod{
+    width: 20%;
+    color: gray;
+    font-size: 14px;
+    text-align: center;
+}
+.amt{
+    width: 20%;
+    text-align: center;
+}
+.max{
+    width: 20%;
+    color: gray;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* MAIN */
+.notresourcebar{
+    width: 80%; 
+    display: flex;
+    height:     auto;
+    min-height: 100%;
+    margin:     0px auto;
+    padding:    0px auto;
+    flex-wrap: nowrap;
+}
+.main{
+    padding: 5px;
+    float: left;
+    width: 75%;
+    height:     auto;
+    min-height: 100%;
+    margin:     0px auto;
+    padding:    0px auto;
+}
+.btn{
+    height: 90px;
+    width: 235px;
+    border-radius: 15px;
+    border: 2px solid #444;
+    text-align: center;
+    cursor: pointer;
+    margin: 10px;
+    background-color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-shadow: 2px 2px 5px black, inset 2px 2px 5px #444;
+}
+.btn:hover, .btn:focus{
+    background-color: gray;
+    color: black;
+}
+.btn:active {
+    transform: translateY(2px);
+  }
+/* BUILDINGS */
+.building{
+    width: 50%;
+    min-height: 120px;
+    display: grid;
+}
+.buildingBtn{
+    float: right;
+    width: 100px;
+    height: 40px;
+    display: inline;
+}
+.listCosts{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 5px;
+}
+/* GOLEM CREATION */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    backdrop-filter: blur(1px);
+}
+.modal-content {
+    border-radius: 25px;
+    background-color: #222;
+    margin: auto;
+    padding: 20px;
+    vertical-align: center;
+    border: 1px solid gray;
+    width: 50%;
+}
+#listGolems{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+.close {
+    float: right;
+    color: gray;
+    font-size: 32px;
+    font-weight: bold;
+    position: sticky;
+    display: inline;
+    right: 00%;
+}
+.close:hover,
+.close:focus {
+    color: whitesmoke;
+    text-decoration: none;
+    cursor: pointer;
+}
+.golem{
+    width: 50%;
+    min-height: 120px;
+    display: grid;
+}
+.golemBtn{
+    float: right;
+    width: 100px;
+    height: 40px;
+    display: inline;
+}
+/* POPULATION */
+#popmanagement{
+    width: 27.5%;
+}
+#workerList{
+    width: 72.5%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+#workerList p{
+    float: right;
+}
+/* RESEARCH */
+#researchContent{
+    display: flex;
+    flex-direction: row;
+    min-height: 100%;
+    height: 20;
+}
+.column{
+    float: left;
+    min-height: 100%;
+    width: 50%;
+}
+.btnResearch{
+    float: right;
+    height: 50px;
+    width: 120px;
+}
+
+/* GAME LOG */
+.gameLog{
+    padding: 5px;
+    float: left;
+    height: 100%;
+    width: 25%;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+.gameLog p{
+    margin: 0 10px;
+}
+#gameLogContent{
+    height: 100%;
+    min-height: 240px;
+    max-height: 420px;
+    overflow-y: auto;
+}
+.message{
+    padding: 10px;
+}
+.message:nth-child(even){
+    background-color: #2b2b2b;
+}
+
+/* RESPONSIVE STUFF */
+/* for phones */
+@media screen and (max-width: 600px) {
+    .sticky{
+        top: auto;
+        bottom: 0;
+    }
+    h1{
+        font-size: 64px;
+    }
+    .topnav.responsive {
+        position: relative;
+    }
+    .topnav.responsive a {
+        float: none;
+        display: block;
+        text-align: center;
+    }
+    #resourcebar, .main, .gameLog{
+        width: 100%;
+        height: fit-content;
+    }
+    .building{
+        min-width: 100%;
+    }
+    .notresourcebar{
+        width: 100%;
+        height: fit-content;
+        flex-direction: column;
+    }
+    .column{
+        width: 100%;
+    }
+    #popmanagement{
+        width: 100%;
+    }
+    #popmanagement:after{
+        content:' ';
+        display:block;
+        border:1px solid gray;
+        margin:5px;
+        box-shadow: 1px 1px 3px black;
+    }
+    #workerList{
+        width: 100%;
+    }
+    a img{
+        display: inline;
+    }
+    a span{
+        display: none;
+    }
+    .box .row.footer {
+        padding-bottom: 60px;
+        font-size: 18px;
+    }
+    .modal-content{
+        width: 90%;
+    }
+}
+/* for medium sized devices */
+@media screen and (min-width:600px) and (max-width:1000px){
+    
+    #resourcebar{
+        width: 37.5%;
+    }
+    .notresourcebar{
+        width: 62.5%;
+        float: right;
+        height: 100%;
+        flex: 1;
+        justify-content: center;
+        flex-direction: column;
+    }
+    .main{
+        width: 100%;
+    }
+    .gameLog{
+        width: 100%;
+    }
+    .building{
+        min-width: 100%;
+    }
+    #popmanagement{
+        width: 100%;
+    }
+    #popmanagement:after{
+        content:' ';
+        display:block;
+        border:1px solid gray;
+        margin:5px;
+        box-shadow: 1px 1px 3px black;
+    }
+    #workerList{
+        width: 100%;
+    }
+    a img{
+        display: inline;
+    }
+    a span{
+        display: none;
+    }
+    .modal-content{
+        width: 75%;
+    }
+}
+
+@-webkit-keyframes rainbow {
+    0%{background-position:0% 82%}
+    50%{background-position:100% 19%}
+    100%{background-position:0% 82%}
+}
+@-moz-keyframes rainbow {
+    0%{background-position:0% 82%}
+    50%{background-position:100% 19%}
+    100%{background-position:0% 82%}
+}
+@-o-keyframes rainbow {
+    0%{background-position:0% 82%}
+    50%{background-position:100% 19%}
+    100%{background-position:0% 82%}
+}
+@keyframes rainbow { 
+    0%{background-position:0% 82%}
+    50%{background-position:100% 19%}
+    100%{background-position:0% 82%}
+}
