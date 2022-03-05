@@ -7,7 +7,6 @@ let gameData;
 let initialGameData = {
   golems: {
       total: 0,
-      workers: 0,
       type: {
         clay: {
           amount: 0,
@@ -71,7 +70,11 @@ let initialGameData = {
     mana: {
       amount: 10,
       max: 10,
-      workers: 0,
+      workers: {
+        clay: 0,
+        wood: 0,
+        stone: 0
+      },
       maxworkers: 0,
       production: 1,
       usage: 0,
@@ -80,7 +83,11 @@ let initialGameData = {
     clay: {
       amount: 0,
       max: 5,
-      workers: 0,
+      workers: {
+        clay: 0,
+        wood: 0,
+        stone: 0
+      },
       maxworkers: 0,
       production: 0,
       usage: 0,
@@ -89,7 +96,11 @@ let initialGameData = {
     wood: {
       amount: 0,
       max: 0,
-      workers: 0,
+      workers: {
+        clay: 0,
+        wood: 0,
+        stone: 0
+      },
       maxworkers: 0,
       production: 0,
       usage: 0,
@@ -98,7 +109,11 @@ let initialGameData = {
     stone: {
       amount: 0,
       max: 0,
-      workers: 0,
+      workers: {
+        clay: 0,
+        wood: 0,
+        stone: 0
+      },
       maxworkers: 0,
       production: 0,
       usage: 0,
@@ -303,8 +318,8 @@ window.onclick = function(event) {
 //tabs
 function tab(tab) {
   document.getElementById("hearth").style.display = "none"
-  document.getElementById("golems").style.display = "none"
   document.getElementById("buildings").style.display = "none"
+  document.getElementById("workers").style.display = "none"
   document.getElementById("research").style.display = "none"
   document.getElementById("workshop").style.display = "none"
   document.getElementById(tab).style.display = "flex"
@@ -325,7 +340,7 @@ function gameLog(message) {
 resourceGen();
 buildingsGen();
 golemsGen();
-// workerGen();
+workerGen();
 // researchGen();
 reset(true);
 checkUnlocks();
@@ -336,21 +351,25 @@ function reset(confirmReset) {
   if (!confirmReset) {return;}
   gameData = JSON.parse(JSON.stringify(initialGameData));
 
-  // Object.values(production).forEach(p =>{
-  //   document.getElementById(p.resource + "Res").style.display = "none";
+//hide hearth buttons
+  document.getElementById('createGolemBtn').style.visibility = "hidden";
+
+  Object.values(production).forEach(p =>{
+    document.getElementById(p.resourceId + "Res").style.display = "none";
   //   document.getElementById(p.resource + "Btn").style.display = "none";
-  //   document.getElementById(p.resource + "Worker").style.display = "none";
-  // })
+    document.getElementById(p.resourceId + "Worker").style.display = "none";
+  })
 
   Object.values(buildings).forEach(b =>{
     document.getElementById(b.buildingId + "Building").style.display = "none";
   })
-  document.getElementById('createGolemBtn').style.visibility = "hidden";
+  
 
   document.getElementById('tabBuildings').style.display = "none";
-  document.getElementById('tabPopulation').style.display = "none";
+  document.getElementById('tabWorkers').style.display = "none";
   document.getElementById('tabResearch').style.display = "none";
   document.getElementById('tabWorkshop').style.display = "none";
+  
 
   document.getElementById('gameLogContent').innerHTML = "<span></span>";
 
@@ -488,6 +507,31 @@ function golemsGen() {
   })
 }
 
+////worker buttons gen
+function workerGen() {
+  Object.values(production).forEach(p =>{
+    let element = document.createElement("div");
+    element.classList.add("worker");
+    element.style.display = "none";
+    element.resource = p.resourceId;
+    element.id = p.resourceId + "Worker";
+    element.innerHTML = `<h3>${p.workers}</h3>`
+    document.getElementById("workerList").appendChild(element);
+
+    Object.values(golems).forEach(g =>{
+      let element = document.createElement("tr");
+      element.classList.add(`${g.resource}GolemWorker`, "golemWorker");
+      element.innerHTML = `<td>${g.displayName}s:</td> 
+      <td class="center"><img class="clickable" src="img/-.png" onclick="hire('${p.resourceId}', '${g.type}', -1)"></img></td>
+      <td class="center" id="${g.resource}Golem_${p.resourceId}Workers">0</td>
+      <td class="center"><img class="clickable" src="img/+.png" onclick="hire('${p.resourceId}', '${g.type}', 1)"></img></td>`
+      document.getElementById(`${p.resourceId}Worker`).appendChild(element);
+    })
+
+  })
+}
+
+
 // *** RESOURCE PRODUCTION LOOP ***
 let productionLoop = window.setInterval(function(){
   
@@ -547,12 +591,15 @@ function checkUnlocks(){
   if (gameData.golems.type.clay.amount >= 1 || gameData.buildings.clayDeposits.unlocked == true){
     unlockBuilding("clayDeposits");
   }
-  if (gameData.golems.type)
   if (gameData.resources.clay.amount >= 25 || gameData.buildings.manaTower.unlocked == true){
     unlockBuilding("manaTower");
   }
   if (gameData.resources.clay.amount >= 35 || gameData.buildings.manaWell.unlocked == true){
     unlockBuilding("manaWell");
+  }
+  if (gameData.buildings.clayDeposits.level >= 1){
+    unlockWorker("clay");
+    unlockTab("tabWorkers")
   }
 }
 
@@ -605,16 +652,16 @@ function getGolemCost(type){
   const resources = [];
   switch (type) {
     case 'clay':
-      resources.push({'resource': 'mana', 'amount': Math.ceil(5 * Math.pow(amount, 1.43))});
+      resources.push({'resource': 'mana', 'amount': Math.ceil(5 * Math.pow(amount, 1.23))});
       resources.push({'resource': 'clay', 'amount': Math.ceil(10 * Math.pow(amount, 1.43))});
     break;
     case 'wood':
-      resources.push({'resource': 'mana', 'amount': Math.ceil(25 * Math.pow(amount, 1.43))});
-      resources.push({'resource': 'wood', 'amount': Math.ceil(10 * Math.pow(amount, 1.43))});
+      resources.push({'resource': 'mana', 'amount': Math.ceil(25 * Math.pow(amount, 1.23))});
+      resources.push({'resource': 'wood', 'amount': Math.ceil(15 * Math.pow(amount, 1.43))});
     break;
     case 'stone':
-      resources.push({'resource': 'mana', 'amount': Math.ceil(150 * Math.pow(amount, 1.43))});
-      resources.push({'resource': 'stone', 'amount': Math.ceil(10 * Math.pow(amount, 1.43))});
+      resources.push({'resource': 'mana', 'amount': Math.ceil(150 * Math.pow(amount, 1.23))});
+      resources.push({'resource': 'stone', 'amount': Math.ceil(20 * Math.pow(amount, 1.43))});
     break;
   }
   return resources;

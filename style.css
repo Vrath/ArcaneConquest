@@ -351,19 +351,34 @@ p{
     height: 40px;
     display: inline;
 }
-/* POPULATION */
-#popmanagement{
+/* WORKERS */
+#golemsInfo{
     width: 27.5%;
 }
 #workerList{
     width: 72.5%;
-    display: flex;
+    display: block;
     flex-direction: row;
     justify-content: space-around;
     flex-wrap: wrap;
 }
-#workerList p{
-    float: right;
+.worker{
+    width: 320px;
+    display: table;
+}
+.golemWorker{
+    height: 32px;
+    width: 320px;
+    line-height: 32px;
+}
+.center{
+    text-align: center;
+}
+.clickable{
+    filter: drop-shadow(0 0 2px black);
+}
+.clickable:active{
+    transform: translateY(2px);
 }
 /* RESEARCH */
 #researchContent{
