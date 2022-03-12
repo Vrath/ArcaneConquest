@@ -1,6 +1,6 @@
 "use strict";
 
-document.getElementById('version').innerText = "0.0.15"
+document.getElementById('version').innerText = "0.0.16"
 // (9+X) ^ 2 / 100 * log10(9+X)
 
 let gameData;
@@ -135,45 +135,49 @@ const production = {
     resourceId: "mana",
     displayName: "mana",
     workers: "N/A",
-    desc: "Mana is the magical energy used to power, control, cast, and more..."
+    desc: "Mana is the magical energy used to power, control, cast, and more...",
+    toughness: 1
   },
   clay: {
     resourceId: "clay",
     displayName: "clay",
     workers: "clay diggers",
-    desc: "Clay is the one of the most primitive materials. It is easy to shape, but not very durable."
+    desc: "Clay is the one of the most primitive materials. It is easy to shape, but not very durable.",
+    toughness: 2
   },
   wood: {
     resourceId: "wood",
     displayName: "livingwood",
     workers: "lumberjacks",
-    desc: "Wood is easy to gather, easy to work with, relatively durable, but prone to fire."
+    desc: "Wood is easy to gather, easy to work with, relatively durable, but prone to fire.",
+    toughness: 4
   },
   stone: {
     resourceId: "stone",
     displayName: "stone",
     workers: "stone miners",
-    desc: "Stone is hard to gather or work with, but also tough to break."
+    desc: "Stone is hard to gather or work with, but also tough to break.",
+    toughness: 7
   }
 }
 
 const golems = {
   clay: {
-    resource: "clay",
+    type: "clay",
     displayName: "clay golem",
     desc: "Clay golems are easy to make, dexterous, but also very fragile.",
     upkeep: 0.25,
     power: 1
   },
   wood: {
-    resource: "wood",
+    type: "wood",
     displayName: "wood golem",
     desc: "Wood golems are well balanced between their toughness, strength, and ease of control.",
     upkeep: 1,
     power: 5
   },
   stone: {
-    resource: "stone",
+    type: "stone",
     displayName: "stone golem",
     desc: "Stone golems are tough and sturdy, but very slow.",
     upkeep: 5,
@@ -414,6 +418,7 @@ function updateAll(){
     let amt = nFormatter(gameData.resources[p.resourceId].amount, 2);
     let max = nFormatter(gameData.resources[p.resourceId].max, 2);
     if (prod > 0){document.getElementById(`${p.resourceId}Prod`).innerHTML = "+" + prod + "/s";}
+    if (prod == 0){document.getElementById(`${p.resourceId}Prod`).innerHTML = "";}
     if (prod < 0){document.getElementById(`${p.resourceId}Prod`).innerHTML = `<span style="color= red">` + prod + "/s</span>";}
     document.getElementById(`${p.resourceId}Amt`).innerHTML = amt;
     document.getElementById(`${p.resourceId}Max`).innerHTML = "/" + max;
@@ -433,35 +438,52 @@ function updateAll(){
 
   //golem creation menu
   Object.values(golems).forEach(g =>{
-    document.getElementById(g.resource + "GolemAmt").innerHTML = gameData.golems.type[g.resource].amount;
-    document.getElementById(g.resource + "GolemCosts").innerHTML = "";  
-    Object.values(getGolemCost(g.resource)).forEach(r =>{
+    document.getElementById(g.type + "GolemAmt").innerHTML = gameData.golems.type[g.type].amount;
+    document.getElementById(g.type + "GolemCosts").innerHTML = "";  
+    Object.values(getGolemCost(g.type)).forEach(r =>{
       let element = document.createElement("span");
       if (r.amount > gameData.resources[r.resource].amount) {element.classList.add("red");}
       element.innerHTML = `<div class="item-bg"><img src="img/${r.resource}.png"></img></div> ` + production[r.resource].displayName + ": "+ r.amount + "<br>";
-      document.getElementById(g.resource + "GolemCosts").appendChild(element);
+      document.getElementById(g.type + "GolemCosts").appendChild(element);
     })
   })
 
   //golem management
   document.getElementById("golemsTotal").innerHTML = nFormatter(gameData.golems.total, 0);
   Object.values(golems).forEach(g =>{
-    if (gameData.golems.type[g.resource].amount > gameData.golems.type[g.resource].working){
-      document.getElementById(g.resource + "GolemInfo").innerHTML = gameData.golems.type[g.resource].amount + " ("+ (gameData.golems.type[g.resource].amount - gameData.golems.type[g.resource].working) +" without a job)"
+    if (gameData.golems.type[g.type].amount > gameData.golems.type[g.type].working){
+      document.getElementById(g.type + "GolemInfo").innerHTML = gameData.golems.type[g.type].amount + " ("+ (gameData.golems.type[g.type].amount - gameData.golems.type[g.type].working) +" without a job)"
     }
     else{
-      document.getElementById(g.resource + "GolemInfo").innerHTML = gameData.golems.type[g.resource].amount
+      document.getElementById(g.type + "GolemInfo").innerHTML = gameData.golems.type[g.type].amount
     }
   })
 
   Object.values(production).forEach(p =>{
     Object.values(golems).forEach(g =>{
       if (p.resourceId != "mana"){
-        document.getElementById(g.resource + "Golem_" + p.resourceId + "Workers").innerHTML = gameData.resources[p.resourceId].workers[g.resource];
+        document.getElementById(g.type + "Golem_" + p.resourceId + "Workers").innerHTML = gameData.resources[p.resourceId].workers[g.type];
       }
     })
   })
+  
+  //calculate production per second
+  Object.values(production).forEach(p =>{
+    let prod = 0;
+    if (p.resourceId != "mana"){
+      Object.values(golems).forEach(g => {
+        prod += gameData.resources[p.resourceId].workers[g.type] * gameData.golems.type[g.type].efficiency * g.power;
+      })
+      gameData.resources[p.resourceId].production = prod / p.toughness;
+    }
+  })
 
+  
+  //calculate golem mana upkeep total
+  gameData.resources.mana.usage = 0;
+  Object.values(golems).forEach(g =>{
+    gameData.resources.mana.usage += g.upkeep * gameData.golems.type[g.type].working * gameData.golems.type[g.type].upkeepMultiplier;
+  })
 
   checkUnlocks();
 }
@@ -520,20 +542,20 @@ function buildingsGen() {
 function golemsGen() {
   Object.values(golems).forEach(g =>{
     let element = document.createElement("div");
-    element.classList.add("golem", "box", "flow-column", g.resource + "Golem");
+    element.classList.add("golem", "box", "flow-column", g.type + "Golem");
     element.style.display = "none";
-    element.id = g.resource + "Golem";
-    element.golemType = g.resource;
+    element.id = g.type + "Golem";
+    element.golemType = g.type;
     element.innerHTML = `<h3>${g.displayName}</h3>
     <div>
     <p class="desc">${g.desc}</p>
-    <div class="btn golemBtn" id="${g.resource}GolemBtn">Create</div>
-    <p>Amount owned: <span id="${g.resource}GolemAmt"></span></p>
+    <div class="btn golemBtn" id="${g.type}GolemBtn">Create</div>
+    <p>Amount owned: <span id="${g.type}GolemAmt"></span></p>
     <p>Mana upkeep cost: <b>${g.upkeep}</b>/s</p>
-    <div class="listCosts" id="${g.resource}GolemCosts"></div>
+    <div class="listCosts" id="${g.type}GolemCosts"></div>
     </div>`
     document.getElementById("listGolems").appendChild(element);
-    document.getElementById(g.resource + "Golem").style.display = "none";
+    document.getElementById(g.type + "Golem").style.display = "none";
   })
   document.addEventListener("click", event => {
     let target = event.target.closest(".golemBtn");
@@ -546,9 +568,9 @@ function golemsGen() {
 function golemsInfoGen(){
   Object.values(golems).forEach(g =>{
     let element = document.createElement("p");
-    element.classList.add(g.resource + "Golem");
+    element.classList.add(g.type + "Golem");
     element.style.display = "none";
-    element.innerHTML = `${g.displayName}s: <span id="${g.resource}GolemInfo"></span>`
+    element.innerHTML = `${g.displayName}s: <span id="${g.type}GolemInfo"></span>`
     document.getElementById("golemsInfo").appendChild(element);
   }
 )}
@@ -566,12 +588,12 @@ function workerGen() {
 
     Object.values(golems).forEach(g =>{
       let element = document.createElement("tr");
-      element.classList.add(`${g.resource}Golem`, "golemWorker");
+      element.classList.add(`${g.type}Golem`, "golemWorker");
       element.style.display = "none";
       element.innerHTML = `<td>${g.displayName}s:</td> 
-      <td class="center"><img class="clickable" src="img/-.png" onclick="hire('${p.resourceId}', '${g.resource}', -1)"></img></td>
-      <td class="center" id="${g.resource}Golem_${p.resourceId}Workers">0</td>
-      <td class="center"><img class="clickable" src="img/+.png" onclick="hire('${p.resourceId}', '${g.resource}', 1)"></img></td>`
+      <td class="center"><img class="clickable" src="img/-.png" onclick="hire('${p.resourceId}', '${g.type}', -1)"></img></td>
+      <td class="center" id="${g.type}Golem_${p.resourceId}Workers">0</td>
+      <td class="center"><img class="clickable" src="img/+.png" onclick="hire('${p.resourceId}', '${g.type}', 1)"></img></td>`
       document.getElementById(`${p.resourceId}Worker`).appendChild(element);
     })
   })
@@ -710,7 +732,6 @@ function createGolem(type){
     if (payIfPossible(getGolemCost(type))){
       gameData.golems.type[type].amount++;
       gameData.golems.total++;
-      gameData.resources.mana.usage += golems[type].upkeep;
     }
   }
 }
