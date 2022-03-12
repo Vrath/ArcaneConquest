@@ -191,14 +191,14 @@ const buildings = {
     displayName: "mana tower",
     type: "storage",
     resource: "mana",
-    desc: "This building has a magical artifact within it, which lets you store mana."
+    desc: "This building is built around a mysterious crystal, which arcane properties let it store magical energy called mana."
   },
   manaWell: {
     buildingId: "manaWell",
     displayName: "mana well",
     type: "production",
     resource: "mana",
-    desc: "This building concentrates magical energy from the stars and converts it to mana."
+    desc: "This building contains a mystical device somewhat resembling an orrery and a telescope, which concentrates the light from the stars and converts it to mana."
   },
   clayStorage: {
     buildingId: "clayStorage",
@@ -426,7 +426,7 @@ function updateAll(){
 
   //buildings
   Object.values(buildings).forEach(b =>{
-    document.getElementById(b.buildingId + "Name").innerHTML = `<h3>${b.displayName} - level <span style="font-family: 'Titillium Web', sans-serif;"> ${gameData.buildings[b.buildingId].level}</span></h3>`;
+    document.getElementById(b.buildingId + "Name").innerHTML = `<h3>${b.displayName} <span style="font-family: 'Titillium Web', sans-serif; font-size: 20px;">(level ${gameData.buildings[b.buildingId].level})</span></h3>`;
     document.getElementById(b.buildingId + "Costs").innerHTML = "";
     Object.values(getUpgradeCost(b.buildingId, gameData.buildings[b.buildingId].level + 1)).forEach(r =>{
       let element = document.createElement("span");
@@ -434,6 +434,12 @@ function updateAll(){
       element.innerHTML = `<div class="item-bg"><img src="img/${r.resource}.png"></img></div> ` + production[r.resource].displayName + ": "+ r.amount + "<br>";
       document.getElementById(b.buildingId + "Costs").appendChild(element);
     })
+    if (hasResources(getUpgradeCost(b.buildingId))){
+      document.getElementById(b.buildingId + "Btn").classList.remove("deactivated");
+    }
+    else{
+      document.getElementById(b.buildingId + "Btn").classList.add("deactivated");
+    }
   })
 
   //golem creation menu
@@ -446,6 +452,12 @@ function updateAll(){
       element.innerHTML = `<div class="item-bg"><img src="img/${r.resource}.png"></img></div> ` + production[r.resource].displayName + ": "+ r.amount + "<br>";
       document.getElementById(g.type + "GolemCosts").appendChild(element);
     })
+    if (hasResources(getGolemCost(g.type))){
+      document.getElementById(g.type + "GolemBtn").classList.remove("deactivated");
+    }
+    else{
+      document.getElementById(g.type + "GolemBtn").classList.add("deactivated");
+    }
   })
 
   //golem management
