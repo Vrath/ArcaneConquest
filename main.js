@@ -1,6 +1,6 @@
 "use strict";
 
-document.getElementById('version').innerText = "0.0.16"
+document.getElementById('version').innerText = "0.1.0"
 // (9+X) ^ 2 / 100 * log10(9+X)
 
 let gameData;
@@ -135,29 +135,33 @@ const production = {
     resourceId: "mana",
     displayName: "mana",
     workers: "N/A",
+    prodBuilding: "manaWell",
     desc: "Mana is the magical energy used to power, control, cast, and more...",
-    toughness: 1
+    toughness: "N/A"
   },
   clay: {
     resourceId: "clay",
     displayName: "clay",
     workers: "clay diggers",
+    prodBuilding: "clayDeposits",
     desc: "Clay is the one of the most primitive materials. It is easy to shape, but not very durable.",
-    toughness: 2
+    toughness: 1
   },
   wood: {
     resourceId: "wood",
-    displayName: "livingwood",
+    displayName: "greatwood",
     workers: "lumberjacks",
+    prodBuilding: "lumberjacksHut",
     desc: "Wood is easy to gather, easy to work with, relatively durable, but prone to fire.",
-    toughness: 4
+    toughness: 2
   },
   stone: {
     resourceId: "stone",
     displayName: "stone",
     workers: "stone miners",
+    prodBuilding: "stoneQuarry",
     desc: "Stone is hard to gather or work with, but also tough to break.",
-    toughness: 7
+    toughness: 4
   }
 }
 
@@ -165,7 +169,7 @@ const golems = {
   clay: {
     type: "clay",
     displayName: "clay golem",
-    desc: "Clay golems are easy to make, dexterous, but also very fragile.",
+    desc: "Clay golems are easy to make and dexterous, but also very fragile.",
     upkeep: 0.25,
     power: 1
   },
@@ -174,14 +178,14 @@ const golems = {
     displayName: "wood golem",
     desc: "Wood golems are well balanced between their toughness, strength, and ease of control.",
     upkeep: 1,
-    power: 5
+    power: 4.5
   },
   stone: {
     type: "stone",
     displayName: "stone golem",
     desc: "Stone golems are tough and sturdy, but very slow.",
     upkeep: 5,
-    power: 30
+    power: 25
   }
 }
 
@@ -198,7 +202,7 @@ const buildings = {
     displayName: "mana well",
     type: "production",
     resource: "mana",
-    desc: "This building contains a mystical device somewhat resembling an orrery and a telescope, which concentrates the light from the stars and converts it to mana."
+    desc: "This building is actually a mystical device somewhat resembling an orrery or a telescope. It concentrates the energy from the stars and converts it to mana."
   },
   clayStorage: {
     buildingId: "clayStorage",
@@ -464,7 +468,7 @@ function updateAll(){
   document.getElementById("golemsTotal").innerHTML = nFormatter(gameData.golems.total, 0);
   Object.values(golems).forEach(g =>{
     if (gameData.golems.type[g.type].amount > gameData.golems.type[g.type].working){
-      document.getElementById(g.type + "GolemInfo").innerHTML = gameData.golems.type[g.type].amount + " ("+ (gameData.golems.type[g.type].amount - gameData.golems.type[g.type].working) +" without a job)"
+      document.getElementById(g.type + "GolemInfo").innerHTML = gameData.golems.type[g.type].amount + "<i style='font-size: 16px;'> ("+ (gameData.golems.type[g.type].amount - gameData.golems.type[g.type].working) +" without a job)</i>"
     }
     else{
       document.getElementById(g.type + "GolemInfo").innerHTML = gameData.golems.type[g.type].amount
@@ -475,18 +479,19 @@ function updateAll(){
     Object.values(golems).forEach(g =>{
       if (p.resourceId != "mana"){
         document.getElementById(g.type + "Golem_" + p.resourceId + "Workers").innerHTML = gameData.resources[p.resourceId].workers[g.type];
+        document.getElementById(p.resourceId + "WorkersMax").innerHTML = "(" + gameData.resources[p.resourceId].workersTotal + "/" + gameData.resources[p.resourceId].workersMax + ")";
       }
     })
   })
   
   //calculate production per second
   Object.values(production).forEach(p =>{
-    let prod = 0;
+    let golemPower = 0;
     if (p.resourceId != "mana"){
       Object.values(golems).forEach(g => {
-        prod += gameData.resources[p.resourceId].workers[g.type] * gameData.golems.type[g.type].efficiency * g.power;
+        golemPower += gameData.resources[p.resourceId].workers[g.type] * gameData.golems.type[g.type].efficiency * g.power;
       })
-      gameData.resources[p.resourceId].production = prod / p.toughness;
+      gameData.resources[p.resourceId].production = golemPower * (0.95 + 0.05 * gameData.buildings[p.prodBuilding].level) / p.toughness;
     }
   })
 
@@ -595,7 +600,7 @@ function workerGen() {
     element.style.display = "none";
     element.resource = p.resourceId;
     element.id = p.resourceId + "Worker";
-    element.innerHTML = `<h3>${p.workers}</h3>`
+    element.innerHTML = `<h3>${p.workers} <span style="font-family: 'Titillium Web', sans-serif; font-size: 20px;" id="${p.resourceId}WorkersMax">(0/0)</span></h3>`
     document.getElementById("workerList").appendChild(element);
 
     Object.values(golems).forEach(g =>{
@@ -627,8 +632,7 @@ let productionLoop = window.setInterval(function(){
 
 function hire(job, type, amt){
   if (amt > 0 && gameData.golems.type[type].amount >= gameData.golems.type[type].working + amt
-    //&& gameData.resources[job].workersTotal + amt <= gameData.resources[job].workersMax
-    ){
+    && gameData.resources[job].workersTotal + amt <= gameData.resources[job].workersMax){
     gameData.golems.type[type].working += amt;
     gameData.golems.working += amt;
     gameData.resources[job].workers[type] += amt;
@@ -691,18 +695,29 @@ function checkUnlocks(){
     unlockBtn("createGolemBtn");
     unlockGolem("clay");
   }
-  if (gameData.golems.type.clay.amount >= 1 || gameData.buildings.clayDeposits.unlocked == true){
+  if ((gameData.golems.type.clay.amount >= 1 && gameData.resources.clay.amount >= 15) || gameData.buildings.clayDeposits.unlocked == true){
     unlockBuilding("clayDeposits");
   }
-  if (gameData.resources.clay.amount >= 25 || gameData.buildings.manaTower.unlocked == true){
+  if (gameData.resources.clay.amount >= 20 || gameData.buildings.manaTower.unlocked == true){
     unlockBuilding("manaTower");
   }
-  if (gameData.resources.clay.amount >= 35 || gameData.buildings.manaWell.unlocked == true){
+  if (gameData.resources.clay.amount >= 25 || gameData.buildings.manaWell.unlocked == true){
     unlockBuilding("manaWell");
   }
   if (gameData.buildings.clayDeposits.level >= 1){
     unlockWorker("clay");
     unlockTab("tabWorkers")
+  }
+  if (gameData.buildings.manaTower.level >= 1 && gameData.buildings.manaWell.level >= 1){
+    unlockBuilding("woodShed");
+    unlockBuilding("lumberjacksHut");
+  }
+  if (gameData.buildings.woodShed.level >= 1 && gameData.buildings.lumberjacksHut.level >= 1){
+    unlockWorker("wood");
+    unlockResource("wood");
+  }
+  if (gameData.resources.wood.amount >= 10 || gameData.buildings.library.unlocked == true){
+    unlockBuilding("library");
   }
 }
 
@@ -775,16 +790,32 @@ function getUpgradeCost(building){
   const resources = [];
     switch (building) {
       case 'clayStorage':
-        resources.push({'resource': 'clay', 'amount': Math.ceil(5 * Math.pow(level, 1.73))});
+        resources.push({'resource': 'clay', 'amount': 5 + Math.ceil(10 * (Math.pow(level, 1.43) - Math.pow(level, 0.75)))});
+        if (level > 3){resources.push({'resource': 'wood', 'amount': Math.ceil(5 * Math.pow(level-3, 1.43))});}
       break;
       case 'clayDeposits':
-        resources.push({'resource': 'clay', 'amount': Math.ceil(20 * Math.pow(level, 1.73))});
+        resources.push({'resource': 'clay', 'amount': Math.ceil(15 * Math.pow(level, 1.43))});
+        if (level > 3){resources.push({'resource': 'wood', 'amount': Math.ceil(6 * Math.pow(level-3, 1.43))});}
       break;
       case 'manaTower':
-        resources.push({'resource': 'clay', 'amount': Math.ceil(30 * Math.pow(level, 1.73))});
+        resources.push({'resource': 'clay', 'amount': Math.ceil(25 * Math.pow(level, 1.43))});
+        if (level > 2){resources.push({'resource': 'wood', 'amount': Math.ceil(7 * Math.pow(level-2, 1.43))});}
       break;
       case 'manaWell':
-        resources.push({'resource': 'clay', 'amount': Math.ceil(40 * Math.pow(level, 1.73))});
+        resources.push({'resource': 'clay', 'amount': Math.ceil(35 * Math.pow(level, 1.43))});
+        if (level > 2){resources.push({'resource': 'wood', 'amount': Math.ceil(8 * Math.pow(level-2, 1.43))});}
+      break;
+      case 'woodShed':
+        resources.push({'resource': 'clay', 'amount': Math.ceil(20 * Math.pow(level, 1.43))});
+        if (level > 1){resources.push({'resource': 'wood', 'amount': Math.ceil(9 * (Math.pow(level-1, 1.43) - Math.pow(level-1, 0.5)))});}
+      break;
+      case 'lumberjacksHut':
+        resources.push({'resource': 'clay', 'amount': Math.ceil(30 * Math.pow(level, 1.43))});
+        if (level > 1){resources.push({'resource': 'wood', 'amount': Math.ceil(10 * Math.pow(level-1, 1.43))});}
+      break;
+      case 'library':
+        resources.push({'resource': 'clay', 'amount': Math.ceil(40 * Math.pow(level, 1.43))});
+        resources.push({'resource': 'wood', 'amount': Math.ceil(15 * Math.pow(level, 1.43))});
       break;
     }
   return resources;
@@ -796,16 +827,25 @@ function upgradeBuilding(building){
     let level = gameData.buildings[building].level;
     switch (building) {
       case 'clayStorage':
-        gameData.resources.clay.max = 10 + 10 * Math.round(Math.pow(level, 1.8));
+        gameData.resources.clay.max = 10 + 10 * Math.round(Math.pow(level, 1.43));
       break;
       case 'clayDeposits':
-        gameData.resources.clay.maxworkers = Math.floor(Math.pow(level, 2)/2);
+        gameData.resources.clay.workersMax = level * 5;
       break;
       case 'manaTower':
-        gameData.resources.mana.max = 10 + 10 * Math.round(Math.pow(level, 1.43));
+        gameData.resources.mana.max = 10 + 10 * Math.ceil(Math.pow(level, 1.23));
       break;
       case 'manaWell':
-        gameData.resources.mana.production += Math.round(Math.pow(level, 1.43));
+        gameData.resources.mana.production += Math.round(Math.pow(level, 1.23));
+      break;
+      case 'woodShed':
+        gameData.resources.wood.max = 10 + 10 * Math.ceil(Math.pow(level, 1.43));
+      break;
+      case 'lumberjacksHut':
+        gameData.resources.wood.workersMax = level * 5;
+      break;
+      case 'library':
+        unlockTab("researchTab");
       break;
   }
   updateAll();
