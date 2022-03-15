@@ -1,6 +1,6 @@
 "use strict";
 
-document.getElementById('version').innerText = "0.1.0"
+document.getElementById('version').innerText = "0.1.1"
 // (9+X) ^ 2 / 100 * log10(9+X)
 
 let gameData;
@@ -71,6 +71,18 @@ let initialGameData = {
       }
     },
   resources: {
+    research: {
+      workers: {
+        clay: 0,
+        wood: 0,
+        stone: 0
+      },
+      workersTotal: 0,
+      workersMax: 0,
+      production: 0,
+      usage: 0,
+      unlocked: false
+    },
     mana: {
       amount: 10,
       max: 10,
@@ -81,7 +93,7 @@ let initialGameData = {
       },
       workersTotal: 0,
       workersMax: 0,
-      production: 1,
+      production: 1.25,
       usage: 0,
       unlocked: false
     },
@@ -127,17 +139,38 @@ let initialGameData = {
       usage: 0,
       unlocked: false
     }
+  },
+  currentResearch: "none",
+  research: {
+    golemWood: {
+      unlocked: false,
+      completed: false,
+      points: 0
+    },
+    mining1: {
+      unlocked: false,
+      completed: false,
+      points: 0
+    }
   }
 }
 
 const production = {
+  research: {
+    resourceId: "research",
+    displayName: "research",
+    workers: "researchers",
+    prodBuilding: "library",
+    desc: "n/a",
+    toughness: 10
+  },
   mana: {
     resourceId: "mana",
     displayName: "mana",
-    workers: "N/A",
+    workers: "n/a",
     prodBuilding: "manaWell",
     desc: "Mana is the magical energy used to power, control, cast, and more...",
-    toughness: "N/A"
+    toughness: "n/a"
   },
   clay: {
     resourceId: "clay",
@@ -160,7 +193,7 @@ const production = {
     displayName: "stone",
     workers: "stone miners",
     prodBuilding: "stoneQuarry",
-    desc: "Stone is hard to gather or work with, but also tough to break.",
+    desc: "Stone may be hard to gather or work with, but it's also tough to break.",
     toughness: 4
   }
 }
@@ -170,22 +203,22 @@ const golems = {
     type: "clay",
     displayName: "clay golem",
     desc: "Clay golems are easy to make and dexterous, but also very fragile.",
-    upkeep: 0.25,
+    upkeep: 0.5,
     power: 1
   },
   wood: {
     type: "wood",
     displayName: "wood golem",
     desc: "Wood golems are well balanced between their toughness, strength, and ease of control.",
-    upkeep: 1,
-    power: 4.5
+    upkeep: 1.25,
+    power: 3
   },
   stone: {
     type: "stone",
     displayName: "stone golem",
     desc: "Stone golems are tough and sturdy, but very slow.",
-    upkeep: 5,
-    power: 25
+    upkeep: 2.25,
+    power: 5.75
   }
 }
 
@@ -202,35 +235,35 @@ const buildings = {
     displayName: "mana well",
     type: "production",
     resource: "mana",
-    desc: "This building is actually a mystical device somewhat resembling an orrery or a telescope. It concentrates the energy from the stars and converts it to mana."
+    desc: "This building is actually a large mystical device somewhat resembling an orrery or a telescope. It concentrates energy from the stars and converts it to mana."
   },
   clayStorage: {
     buildingId: "clayStorage",
     displayName: "clay storage",
     type: "storage",
     resource: "clay",
-    desc: "This building is used to store clay. Upgrade it to increase the max amount of clay you can store."
+    desc: "This building is used to store clay. Upgrade it to increase the maximum amount of clay you can store."
   },
   clayDeposits: {
     buildingId: "clayDeposits",
     displayName: "clay deposits",
     type: "production",
     resource: "clay",
-    desc: "This building allows your golems to produce clay. Upgrade it to increase maximum amount of diggers and increase their efficiency."
+    desc: "This building allows your golems to dig clay. Upgrade it to increase maximum amount of diggers and increase their efficiency by 5%."
   },
   woodShed: {
     buildingId: "woodShed",
     displayName: "wood shed",
     type: "storage",
     resource: "wood",
-    desc: "This building is used to store wood."
+    desc: "This building is used to store wood. Upgrade it to increase its capacity."
   },
   lumberjacksHut: {
     buildingId: "lumberjacksHut",
     displayName: "lumberjacks hut",
     type: "production",
     resource: "wood",
-    desc: "This building allows you to hire lumberjacks. Upgrade it to increase maximum amount of lumberjacks and increase their efficiency."
+    desc: "This building allows you to hire lumberjacks. Upgrade it to increase maximum amount of lumberjacks and increase their efficiency by 5%."
   },
   stoneyard: {
     buildingId: "stoneyard",
@@ -244,14 +277,39 @@ const buildings = {
     displayName: "stone quarry",
     type: "production",
     resource: "stone",
-    desc: "This building lets your golems mine stone."
+    desc: "This building lets your golems mine stone. Upgrading it will increase its capacity and add a 5% bonus to your workers."
   },
   library: {
     buildingId: "library",
     displayName: "library",
     type: "other",
     resource: "research",
-    desc: "This building allows you to research new technologies."
+    desc: "This building allows you to research new technologies. You can upgrade it to increase its capacity as well increase your researchers' efficiency by 5%."
+  }
+}
+
+const research = {
+  golemWood: {
+    researchId: "golemWood",
+    displayName: "wood golems",
+    description: "It seems that one of the types of trees growing around here is harder and grows bigger than other trees. I'm pretty sure that it has magical properties too. Perhaps some research on its structure will let me make golems out of it?",
+    completedDesc: "Just as I thought, this type of wood has something magical in it. The golems made out of this material are going to be harder to control, but I'm sure that will pay off.",
+    requiredResearch: 50,
+    requiredResources: {
+      'mana': 50,
+      'wood': 50
+    }
+  },
+  mining1: {
+    researchId: "mining1",
+    displayName: "mining I",
+    description: "My golems could gather more kinds of resources. I'm sure this would help further with my expansion.",
+    completedDesc: "I have designed a quarry, in which golems will be able to mine stone.",
+    requiredResearch: 75,
+    requiredResources: {
+      'clay': 100,
+      'wood': 50
+    }
   }
 }
 
@@ -277,6 +335,13 @@ function nFormatter(num, digits) {
     });
     return item ? (num / item.value).toFixed(digits).replace(rx, "$1") + item.symbol : "0";
   }
+}
+//calculate percentage
+function percentify(val1, val2){
+  return Intl.NumberFormat("en-GB", { style: "percent", 
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1
+  }).format(val1 / val2);
 }
 
 // *** UI ***
@@ -340,6 +405,8 @@ function tab(tab) {
   document.getElementById("buildings").style.display = "none"
   document.getElementById("workers").style.display = "none"
   document.getElementById("research").style.display = "none"
+  document.getElementById("tavern").style.display = "none"
+  document.getElementById("explore").style.display = "none"
   document.getElementById("workshop").style.display = "none"
   document.getElementById(tab).style.display = "flex"
 }
@@ -361,7 +428,7 @@ buildingsGen();
 golemsGen();
 golemsInfoGen();
 workerGen();
-// researchGen();
+researchGen();
 reset(true);
 checkUnlocks();
 
@@ -376,7 +443,6 @@ function reset(confirmReset) {
 
   Object.values(production).forEach(p =>{
     document.getElementById(p.resourceId + "Res").style.display = "none";
-  //   document.getElementById(p.resource + "Btn").style.display = "none";
     document.getElementById(p.resourceId + "Worker").style.display = "none";
   })
 
@@ -388,6 +454,8 @@ function reset(confirmReset) {
   document.getElementById('tabBuildings').style.display = "none";
   document.getElementById('tabWorkers').style.display = "none";
   document.getElementById('tabResearch').style.display = "none";
+  document.getElementById('tabTavern').style.display = "none";
+  document.getElementById('tabExplore').style.display = "none";
   document.getElementById('tabWorkshop').style.display = "none";
   
 
@@ -417,15 +485,19 @@ function updateAll(){
 
   //resourcebar updates
   Object.values(production).forEach(p =>{
+  if (p.resourceId != "research"){
     if (gameData.resources[p.resourceId].amount > gameData.resources[p.resourceId].max){gameData.resources[p.resourceId].amount = gameData.resources[p.resourceId].max}
     let prod = nFormatter((gameData.resources[p.resourceId].production - gameData.resources[p.resourceId].usage), 2);
     let amt = nFormatter(gameData.resources[p.resourceId].amount, 2);
     let max = nFormatter(gameData.resources[p.resourceId].max, 2);
-    if (prod > 0){document.getElementById(`${p.resourceId}Prod`).innerHTML = "+" + prod + "/s";}
-    if (prod == 0){document.getElementById(`${p.resourceId}Prod`).innerHTML = "";}
-    if (prod < 0){document.getElementById(`${p.resourceId}Prod`).innerHTML = `<span style="color= red">` + prod + "/s</span>";}
+    if (prod > 0){document.getElementById(`${p.resourceId}Prod`).innerHTML = `<span style="color:lime;">+` + prod + "/s</span>";}
+    else if (prod == 0){document.getElementById(`${p.resourceId}Prod`).innerHTML = "";}
+    else if (prod*-60 >= amt){document.getElementById(`${p.resourceId}Prod`).innerHTML = `<span style="color: red;">` + prod + "/s</span>";}
+    else if (prod*-3600 >= amt){document.getElementById(`${p.resourceId}Prod`).innerHTML = `<span style="color: orange;">` + prod + "/s</span>";}
+    else if (prod < 0){document.getElementById(`${p.resourceId}Prod`).innerHTML = `<span style="color: yellow;">` + prod + "/s</span>";}
     document.getElementById(`${p.resourceId}Amt`).innerHTML = amt;
     document.getElementById(`${p.resourceId}Max`).innerHTML = "/" + max;
+  }
   })
 
   //buildings
@@ -494,7 +566,6 @@ function updateAll(){
       gameData.resources[p.resourceId].production = golemPower * (0.95 + 0.05 * gameData.buildings[p.prodBuilding].level) / p.toughness;
     }
   })
-
   
   //calculate golem mana upkeep total
   gameData.resources.mana.usage = 0;
@@ -502,8 +573,39 @@ function updateAll(){
     gameData.resources.mana.usage += g.upkeep * gameData.golems.type[g.type].working * gameData.golems.type[g.type].upkeepMultiplier;
   })
 
+  //research
+  Object.values(research).forEach(r =>{
+    //show research points progress
+    document.getElementById(r.researchId + "Prog").innerHTML = "Current research: <img src='img/research.png'></img> " + nFormatter(gameData.research[r.researchId].points, 2) + " / " + nFormatter(research[r.researchId].requiredResearch, 2) + " (" + percentify(gameData.research[r.researchId].points, research[r.researchId].requiredResearch) + ")"
+    //print out required resources
+    document.getElementById(r.researchId + "Costs").innerHTML = ""; 
+    for (const [res, amount] of Object.entries(research[r.researchId].requiredResources)) {
+      let element = document.createElement("span");
+      if (`${amount}` > gameData.resources[`${res}`].amount) {element.classList.add("red");}
+      element.innerHTML = `<div class="item-bg"><img src="img/${res}.png"></img></div> ` + production[`${res}`].displayName + ": "+ nFormatter(`${amount}`) + "<br>";
+      document.getElementById(r.researchId + "Costs").appendChild(element);
+    }
+    //hide required resources if you've already started the research
+    if (gameData.currentResearch == r.researchId || gameData.research[r.researchId].points > 0){
+      document.getElementById(r.researchId + "Costs").style.display = "none"; 
+    }
+    //lock the research button if you don't have the resources, unless you've already started the research
+    if (gameData.currentResearch != r.researchId && gameData.research[r.researchId].points == 0){
+      //unlock the button
+      document.getElementById(`${r.researchId}ResearchBtn`).classList.remove("deactivated");
+      for (const [res, amount] of Object.entries(research[r.researchId].requiredResources)) {
+        if (`${amount}` > gameData.resources[`${res}`].amount){ 
+          document.getElementById(`${r.researchId}ResearchBtn`).classList.add("deactivated");
+        }
+      }
+    }
+  
+  })
+
   checkUnlocks();
 }
+
+
 // *** HEARTH BUTTONS ***
 
 //conjure clay
@@ -540,8 +642,8 @@ function buildingsGen() {
     element.buildingType = b.buildingId;
     element.innerHTML = `<h3 id="${b.buildingId}Name" style="font-size:24px;">${b.displayName} - level 0</h3>
     <div>
-    <p class="desc">${b.desc}</p>
     <div class="btn buildingBtn" id="${b.buildingId}Btn">Upgrade</div>
+    <p class="desc">${b.desc}</p>
     <div class="listCosts" id="${b.buildingId}Costs"></div>
     </div>`;
     document.getElementById("buildingsList").appendChild(element);
@@ -616,16 +718,50 @@ function workerGen() {
   })
 }
 
+//research gen
+function researchGen(){
+  //available
+  Object.values(research).forEach(r =>{
+    let element = document.createElement("div");
+    element.id = r.researchId + "Available";
+    element.innerHTML = `<div id='${r.researchId}ResearchBtn' class="btn btnResearch" onclick="chooseResearch('${r.researchId}')">Research</div><h3>${r.displayName}</h3>
+    <p class="desc">${r.description}</p>
+    <p id="${r.researchId}Prog">Current progress:</p>
+    <span id="${r.researchId}Costs">Required resources:</span>
+    <hr>`
+    document.getElementById("researchAvailable").appendChild(element);
+    // document.getElementById(r.researchId + "Available").style.display = "none";
+  })
+  //completed
+  Object.values(research).forEach(r =>{
+    let element = document.createElement("div");
+    element.id = r.researchId + "Completed";
+    document.getElementById("researchCompleted").appendChild(element);
+    document.getElementById(r.researchId + "Completed").style.display = "none";
+  })
+}
+
 
 // *** RESOURCE PRODUCTION LOOP ***
 let productionLoop = window.setInterval(function(){
   
   Object.values(production).forEach(p =>{
+    if (p.resourceId != "research"){
     let resource = gameData.resources[p.resourceId]
     resource.amount += resource.production/10;
     resource.amount -= resource.usage/10;
     if (resource.amount > resource.max){resource.amount = resource.max}
-  })
+  }})
+
+  //research
+  if (gameData.currentResearch != "none"){
+    gameData.research[gameData.currentResearch].points += gameData.resources.research.production/10;
+    //research completion
+    if (gameData.research[gameData.currentResearch].points >= research[gameData.currentResearch].requiredResearch){
+      gameData.research[gameData.currentResearch].points == research[gameData.currentResearch].requiredResearch;
+      completeResearch(gameData.currentResearch);
+    }
+  }
 
   updateAll();
 }, 100)
@@ -686,6 +822,11 @@ function unlockGolem(golemType){
   }
 }
 
+function unlockResearch(researchId){
+  document.getElementById(researchId + "Available").style.display = "";
+  gameData.research[researchId].unlocked = true;
+}
+
 function checkUnlocks(){
   if (gameData.resources.clay.amount >= 5 || gameData.buildings.clayStorage.unlocked == true){
     unlockBuilding("clayStorage");
@@ -718,6 +859,13 @@ function checkUnlocks(){
   }
   if (gameData.resources.wood.amount >= 10 || gameData.buildings.library.unlocked == true){
     unlockBuilding("library");
+  }
+  if (gameData.buildings.library.level >= 1){
+    unlockTab("tabResearch");
+    unlockWorker("research");
+  }
+  if (gameData.research.golemWood.completed == true){
+    unlockGolem("wood");
   }
 }
 
@@ -794,28 +942,28 @@ function getUpgradeCost(building){
         if (level > 3){resources.push({'resource': 'wood', 'amount': Math.ceil(5 * Math.pow(level-3, 1.43))});}
       break;
       case 'clayDeposits':
-        resources.push({'resource': 'clay', 'amount': Math.ceil(15 * Math.pow(level, 1.43))});
-        if (level > 3){resources.push({'resource': 'wood', 'amount': Math.ceil(6 * Math.pow(level-3, 1.43))});}
+        resources.push({'resource': 'clay', 'amount': Math.ceil(15 * Math.pow(level, 1.73))});
+        if (level > 3){resources.push({'resource': 'wood', 'amount': Math.ceil(6 * Math.pow(level-3, 1.73))});}
       break;
       case 'manaTower':
         resources.push({'resource': 'clay', 'amount': Math.ceil(25 * Math.pow(level, 1.43))});
         if (level > 2){resources.push({'resource': 'wood', 'amount': Math.ceil(7 * Math.pow(level-2, 1.43))});}
       break;
       case 'manaWell':
-        resources.push({'resource': 'clay', 'amount': Math.ceil(35 * Math.pow(level, 1.43))});
-        if (level > 2){resources.push({'resource': 'wood', 'amount': Math.ceil(8 * Math.pow(level-2, 1.43))});}
+        resources.push({'resource': 'clay', 'amount': Math.ceil(35 * Math.pow(level, 1.73))});
+        if (level > 2){resources.push({'resource': 'wood', 'amount': Math.ceil(8 * Math.pow(level-2, 1.73))});}
       break;
       case 'woodShed':
         resources.push({'resource': 'clay', 'amount': Math.ceil(20 * Math.pow(level, 1.43))});
-        if (level > 1){resources.push({'resource': 'wood', 'amount': Math.ceil(9 * (Math.pow(level-1, 1.43) - Math.pow(level-1, 0.5)))});}
+        if (level > 1){resources.push({'resource': 'wood', 'amount': 10 + Math.ceil(9 * (Math.pow(level-1, 1.43) - Math.pow(level-1, 0.15)))});}
       break;
       case 'lumberjacksHut':
-        resources.push({'resource': 'clay', 'amount': Math.ceil(30 * Math.pow(level, 1.43))});
-        if (level > 1){resources.push({'resource': 'wood', 'amount': Math.ceil(10 * Math.pow(level-1, 1.43))});}
+        resources.push({'resource': 'clay', 'amount': Math.ceil(30 * Math.pow(level, 1.73))});
+        if (level > 1){resources.push({'resource': 'wood', 'amount': Math.ceil(10 * Math.pow(level-1, 1.73))});}
       break;
       case 'library':
-        resources.push({'resource': 'clay', 'amount': Math.ceil(40 * Math.pow(level, 1.43))});
-        resources.push({'resource': 'wood', 'amount': Math.ceil(15 * Math.pow(level, 1.43))});
+        resources.push({'resource': 'clay', 'amount': Math.ceil(40 * Math.pow(level, 1.73))});
+        resources.push({'resource': 'wood', 'amount': Math.ceil(15 * Math.pow(level, 1.73))});
       break;
     }
   return resources;
@@ -839,15 +987,27 @@ function upgradeBuilding(building){
         gameData.resources.mana.production += Math.round(Math.pow(level, 1.23));
       break;
       case 'woodShed':
-        gameData.resources.wood.max = 10 + 10 * Math.ceil(Math.pow(level, 1.43));
+        gameData.resources.wood.max =  10 * Math.ceil(Math.pow(level, 1.43));
       break;
       case 'lumberjacksHut':
         gameData.resources.wood.workersMax = level * 5;
       break;
       case 'library':
-        unlockTab("researchTab");
+        gameData.resources.research.workersMax = Math.ceil(Math.pow(level, 1.43))
       break;
   }
   updateAll();
   }
+}
+
+// *** RESEARCH ***
+//choose active research
+function chooseResearch(researchId){
+  gameData.currentResearch = researchId;
+}
+
+function completeResearch(researchId){
+  gameLog("Research completed!");
+  gameData.research[researchId].unlocked = true;
+  currentResearch = "none";
 }

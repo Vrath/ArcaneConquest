@@ -18,6 +18,8 @@
         <a id="tabBuildings" onclick="tab('buildings')"><img src="img/buildings.png"></img><span>buildings</span></a>
         <a id="tabWorkers" onclick="tab('workers')"><img src="img/population.png"></img><span>golems</span></a>
         <a id="tabResearch" onclick="tab('research')"><img src="img/research.png"></img><span>research</span></a>
+        <a id="tabTavern" onclick="tab('tavern')"><img src="img/tavern.png"></img><span>tavern</span></a>
+        <a id="tabExplore" onclick="tab('explore')"><img src="img/explore.png"></img><span>explore</span></a>
         <a id="tabWorkshop" onclick="tab('workshop')"><img src="img/workshop.png"></img><span>workshop</span></a>
         <a id="tabOptions" onclick="reset()"><img src="img/options.png"></img><span>options</span></a>
     </div>
@@ -81,16 +83,28 @@
                 <div class="pageContent" id="researchContent">
 
                     <div class="column">
-                        <h3>available</h3>
+                        <h3 class="center">available</h3>
                         <div id="researchAvailable"></div>
                     </div>
                     
                     <div class="column">
-                        <h3>completed</h3>
+                        <h3 class="center">completed</h3>
                         <div id="researchCompleted"></div>
                     </div>
 
                 </div>
+            </div>
+
+            <div id="tavern" class="subpage">
+                <h2>tavern</h2>
+                
+
+            </div>
+
+            <div id="explore" class="subpage">
+                <h2>explore</h2>
+                
+
             </div>
 
             <div id="workshop" class="subpage">
@@ -107,7 +121,7 @@
         </div></div>
     </div>
     <div class="row footer">
-    <p style="font-family: 'VT323'">Arcane Conquest pre-alpha v. <span id="version"></span> - with<span style="color: red;"> &lt;3 </span> by Vrath</p>
+    <p style="font-family: 'VT323'">Arcane Conquest pre-alpha v<span id="version"></span> - with<span style="color: red;"> &lt;3 </span> by Vrath</p>
     </div>
 </div>
 <script src="main.js" charset="utf-8" type="text/javascript"></script>
