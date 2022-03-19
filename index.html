@@ -21,7 +21,7 @@
         <a id="tabWorkshop" onclick="tab('workshop')"><img src="img/workshop.png"></img><span>workshop</span></a>
         <a id="tabTavern" onclick="tab('tavern')"><img src="img/tavern.png"></img><span>tavern</span></a>
         <a id="tabExplore" onclick="tab('explore')"><img src="img/explore.png"></img><span>explore</span></a>
-        <a id="tabOptions" onclick="reset()"><img src="img/options.png"></img><span>options</span></a>
+        <a id="tabOptions" onclick="tab('options')"><img src="img/options.png"></img><span>options</span></a>
     </div>
     </div>
     <div class="row content">
@@ -39,11 +39,10 @@
                 <h2>hearth</h2>
                 <div class="pageContent" id="hearthList">
 
-                    <div class="btn" onclick="gatherClay()"><h3>conjure clay</h3>
-                    (1 mana)</div>
-
                     <div class="btn" id="createGolemBtn"><h3>create a golem</h3></div>
 
+                    <div class="btn" onclick="gatherClay()"><h3>conjure clay</h3>
+                    (1 mana)</div>
                     
                     <div id="golemsModal" class="modal">
                     <div class="modal-content" id="createGolemMenu">
@@ -103,14 +102,31 @@
 
             <div id="explore" class="subpage">
                 <h2>explore</h2>
-                
+                <div class="pageContent">
 
+
+
+                </div>
             </div>
 
             <div id="workshop" class="subpage">
                 <h2>workshop</h2>
-                
+                <div class="pageContent">
+                    
 
+
+                </div>
+            </div>
+
+            <div id="options" class="subpage">
+                <h2>options</h2>
+                <div class="pageContent">
+
+                    <div class="btn" onclick="reset()">
+                        <h3>reset game</h3>
+                    </div>
+                    
+                </div>
             </div>
 
         </div>
@@ -121,7 +137,7 @@
         </div></div>
     </div>
     <div class="row footer">
-    <p style="font-family: 'VT323'">Arcane Conquest pre-alpha v<span id="version"></span> - with<span style="color: red;"> &lt;3 </span> by Vrath</p>
+    <p style="font-family: 'VT323'">Arcane Conquest v<span id="version"></span> - with<span style="color: red;"> &lt;3 </span> by Vrath</p>
     </div>
 </div>
 <script src="main.js" charset="utf-8" type="text/javascript"></script>
